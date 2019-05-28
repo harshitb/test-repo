@@ -1,0 +1,115 @@
+Answer to questions in order: 
+Q1 SELECT Product_Id,Count(product_ID) FROM tblProduct AS T1 GROUP BY Product_Id HAVING Count(T1.Order_Day) > 1 
+
+Q2 SELECT T1.Product_Id From tblProduct AS T1 WHERE T1.Order_Day = '2011-07-02' AND T1.Product_Id NOT IN (SELECT T2.Product_Id FROM tblProduct AS T2 WHERE T2.Order_Day = '2011-07-01')
+
+Q3 WITH CTE1 AS ( SELECT T1.Product_Id,T1.Order_Day, SUM(T1.Quantity * T1.Price) AS SumByDay FROM tblProduct AS T1 GROUP BY T1.Product_Id,T1.Order_Day ), CTE2 AS (SELECT Order_Day,MAX(sumbyDay) AS SoldAmount FROM CTE1 GROUP BY Order_Day) SELECT T2.Order_Day,T1.Product_Id,T2.SoldAmount FROM CTE1 AS T1 JOIN CTE2 AS T2 ON T1.Order_Day = T2.Order_Day AND T1.SumByDay = T2.SoldAmount ORDER BY T2.SoldAmount DESC 
+
+Q4 WITH CTE1 AS ( SELECT T1.Product_Id,T1.Order_Day, SUM(T1.Quantity * T1.Price) AS SumByDay FROM tblProduct AS T1 GROUP BY T1.Product_Id,T1.Order_Day ) SELECT [Product_id] ,SUM(IIF([Order_Day]= '2011-07-01', SumByDay , 0)) ,SUM(IIF([Order_Day]= '2011-07-02', SumByDay , 0)) FROM CTE1 GROUP BY [Product_id]; 
+
+Q4 (This is additional answer to Q4 just to show you know how to use PIVOT ) SELECT Product_ID , ISNULL([2011-07-01], 0) AS Day1Sale , ISNULL([2011-07-02], 0) AS Day2Sale FROM (SELECT Product_Id, Order_Day, Quantity * Price AS Sale FROM tblProduct) AS SourceTable PIVOT ( SUM(Sale) FOR Order_Day IN ([2011-07-01], [2011-07-02]) ) AS PivotTable 
+
+Q5 SELECT T1.Product_Id,T1.Order_Day,count(Order_Day) AS NumberOfOrderedInaDay FROM tblProduct AS T1 GROUP BY T1.Product_Id,T1.Order_Day HAVING count(Order_Day) > 1 
+
+Q6 SELECT s.Item, s.OrderID, 1 AS QTY, s.qty/s.QTY AS VALUE FROM orders as s INNER JOIN master.dbo.spt_values t ON t.type='P' AND t.number BETWEEN 1 AND s.QTY 
+
+to create product table 
+
+CREATE TABLE [dbo].[tblProduct]( [Order_Day] [datetime] NULL, [ORDER_ID] [nvarchar](50) NULL, [Product_Id] [nvarchar](10) NULL, [Quantity] [int] NULL, [Price] [int] NULL ) ON [PRIMARY] GO 
+
+INSERT [dbo].[tblProduct] ([Order_Day], [ORDER_ID], [Product_Id], [Quantity], [Price]) VALUES (CAST(N'2011-07-01 00:00:00.000' AS DateTime), N'O1', N'P1', 5, 5) GO 
+
+INSERT [dbo].[tblProduct] ([Order_Day], [ORDER_ID], [Product_Id], [Quantity], [Price]) VALUES (CAST(N'2011-07-01 00:00:00.000' AS DateTime), N'O2', N'P2', 2, 10) GO 
+
+INSERT [dbo].[tblProduct] ([Order_Day], [ORDER_ID], [Product_Id], [Quantity], [Price]) VALUES (CAST(N'2011-07-01 00:00:00.000' AS DateTime), N'O3', N'P3', 10, 25) GO 
+
+INSERT [dbo].[tblProduct] ([Order_Day], [ORDER_ID], [Product_Id], [Quantity], [Price]) VALUES (CAST(N'2011-07-01 00:00:00.000' AS DateTime), N'O4', N'P1', 20, 5) GO 
+
+INSERT [dbo].[tblProduct] ([Order_Day], [ORDER_ID], [Product_Id], [Quantity], [Price]) VALUES (CAST(N'2011-07-02 00:00:00.000' AS DateTime), N'O5', N'P3', 5, 25) GO 
+
+INSERT [dbo].[tblProduct] ([Order_Day], [ORDER_ID], [Product_Id], [Quantity], [Price]) VALUES (CAST(N'2011-07-02 00:00:00.000' AS DateTime), N'O6', N'P4', 6, 20) GO 
+
+INSERT [dbo].[tblProduct] ([Order_Day], [ORDER_ID], [Product_Id], [Quantity], [Price]) VALUES (CAST(N'2011-07-02 00:00:00.000' AS DateTime), N'O7', N'P1', 2, 5) GO 
+
+INSERT [dbo].[tblProduct] ([Order_Day], [ORDER_ID], [Product_Id], [Quantity], [Price]) VALUES (CAST(N'2011-07-02 00:00:00.000' AS DateTime), N'O8', N'P5', 1, 50) GO 
+
+INSERT [dbo].[tblProduct] ([Order_Day], [ORDER_ID], [Product_Id], [Quantity], [Price]) VALUES (CAST(N'2011-07-02 00:00:00.000' AS DateTime), N'O9', N'P6', 2, 50) GO 
+
+INSERT [dbo].[tblProduct] ([Order_Day], [ORDER_ID], [Product_Id], [Quantity], [Price]) VALUES (CAST(N'2011-07-02 00:00:00.000' AS DateTime), N'O10', N'P2', 4, 10) GO
+
+ ---To create Order table 
+ 
+ CREATE TABLE Orders (OrderID nvarchar(10), Item Nvarchar (10),  qty int)
+ INSERT INTO Orders (OrderID,Item,qty) VALUES ('O1','A1',5), ('O2','A2',1), ('O3','A3',3)  
+ 
+ 
+ ----------------------------------------------------------------------------------------------------------------------------------------
+ 
+ ------------------------PRACTICE Questions ------------------------------------------------------------------------------------
+
+INSERT INTO Orders  (ORDER_DAY, ORDER_ID, PRODUCT_ID,  QUANTITY, PRICE)  VALUES  (to_date('2011-07-01','YYYY-MM-DD'), 'O1', 'P1', 5, 5); 
+INSERT INTO Orders  (ORDER_DAY, ORDER_ID, PRODUCT_ID,  QUANTITY, PRICE)  VALUES  VALUES (to_date('2011-07-01','YYYY-MM-DD'), 'O2', 'P2', 2, 10) ; 
+INSERT INTO Orders  (ORDER_DAY, ORDER_ID, PRODUCT_ID,  QUANTITY, PRICE)  VALUES  (to_date('2011-07-01','YYYY-MM-DD'), 'O3', 'P3', 10, 25) ; 
+INSERT INTO Orders  (ORDER_DAY, ORDER_ID, PRODUCT_ID,  QUANTITY, PRICE)  VALUES  (to_date('2011-07-01','YYYY-MM-DD'), 'O4', 'P1', 20, 5) ; 
+INSERT INTO Orders  (ORDER_DAY, ORDER_ID, PRODUCT_ID,  QUANTITY, PRICE)  VALUES  (to_date('2011-07-02','YYYY-MM-DD'), 'O5', 'P3', 5, 25) ; 
+INSERT INTO Orders  (ORDER_DAY, ORDER_ID, PRODUCT_ID,  QUANTITY, PRICE)  VALUES  (to_date('2011-07-02','YYYY-MM-DD'), 'O6', 'P4', 6, 20) ; 
+INSERT INTO Orders  (ORDER_DAY, ORDER_ID, PRODUCT_ID,  QUANTITY, PRICE)  VALUES (to_date('2011-07-02','YYYY-MM-DD'), 'O7', 'P1', 2, 5) ; 
+INSERT INTO Orders  (ORDER_DAY, ORDER_ID, PRODUCT_ID,  QUANTITY, PRICE)  VALUES (to_date('2011-07-02','YYYY-MM-DD'), 'O8', 'P5', 1, 50) ; 
+INSERT INTO Orders  (ORDER_DAY, ORDER_ID, PRODUCT_ID,  QUANTITY, PRICE)  VALUES (to_date('2011-07-02','YYYY-MM-DD'), 'O9', 'P6', 2, 50) ; 
+INSERT INTO Orders  (ORDER_DAY, ORDER_ID, PRODUCT_ID,  QUANTITY, PRICE)  VALUES (to_date('2011-07-02','YYYY-MM-DD'), 'O10', 'P2', 4, 10);
+
+--1
+select product_id, count(*) from orders
+ group by product_id
+ having count(order_day)>1;
+ 
+ --2
+ select distinct product_id from orders
+ where order_day = '02-JUL-11'
+ and product_id not in (select product_id from orders
+ where order_day = '01-JUL-11');
+ 
+ --3
+ select order_day, product_id, sold_amount from
+ (select order_day, product_id, sum(quantity*price)sold_amount,
+ ROW_NUMBER() OVER (PARTITION BY order_day ORDER BY sum(quantity*price) desc) rnum
+ from orders
+ group by order_day, product_id)a
+ where a.rnum=1;
+ 
+ --4
+  select product_id,
+  sum(case when order_day='01-JUL-11' then total_sales else 0 end) as TOTAL_SALES_01,
+  sum( case when order_day='02-JUL-11' then total_sales else 0 end) as TOTAL_SALES_02
+ from (select product_id, order_day, sum(quantity*price) total_sales
+ from orders
+ group by product_id, order_day)
+ group by product_id
+ order by 1;
+  --pivot(sum(total_sales) for order_day in ('01-JUL-11', '02-JUL-11'));
+  
+  
+   select Product_ID, "cur", "pre", COALESCE( "cur"/"pre",0) from
+ (select product_id, order_day, sum(quantity*price) total_sales
+ from orders
+ group by product_id, order_day)
+  pivot(sum(total_sales) for order_day in ('01-JUL-11' "cur", '02-JUL-11' "pre"));
+  
+  --Dept salary as percentage of job
+  SELECT  deptno,job, sum(sal) sal,
+round(sum(sal)/sum(sum(sal)) over(partition by deptno),2) dept_tot_sal,
+round(ratio_to_report(sum(sal)) over(partition by deptno),2) dept_tot_sal_ratio
+FROM   test_emp
+group by deptno,job
+order by 1,2;
+
+-- finding the rolling 3 month avg salary
+select hiredate, sal,
+sum(sal) over(order by HIREDATE ROWS between 2 PRECEDING AND CURRENT ROW) as rolling_3_monthsal
+from test_emp
+order by 1;
+
+select job, hiredate, sal,
+sum(sal) over(partition by JOB order by HIREDATE ROWS between 2 PRECEDING AND CURRENT ROW) as rolling_3_monthsal
+from test_emp
+order by 1; 
